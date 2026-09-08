@@ -4,7 +4,7 @@ import fs from "fs";
 const result = {
   title: "UNRAIDVM",
   cpu: "Intel® Core™ i7-8700K CPU @ 3.70GHz",
-  memory: "8 GiB RAM Multi-bit ECC ",
+  memory: "8 GiB RAM Multi-bit ECC",
   motherboard: "ASUS ASUSTeK COMPUTER INC. , Version Rev 2802",
   diskSpace: "815 MB used of 107 GB (0.8 %)",
   cacheSpace: "23.1 GB used of 53.7 GB (43.0 %)",

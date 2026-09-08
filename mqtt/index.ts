@@ -499,6 +499,21 @@ function getServerDetails(
     client.subscribe(`${env.MQTTBaseTopic}/${serverTitleSanitised}/array`);
 
     client.publish(
+      `${env.MQTTBaseTopic}/binary_sensor/${serverTitleSanitised}/parity/config`,
+      JSON.stringify({
+        payload_on: true,
+        payload_off: false,
+        value_template: "{{ value_json.parityValid }}",
+        state_topic: `${env.MQTTBaseTopic}/${serverTitleSanitised}`,
+        json_attributes_topic: `${env.MQTTBaseTopic}/${serverTitleSanitised}`,
+        name: `parity_valid`,
+        unique_id: `${serverTitleSanitised} unraid api parity`,
+        device: serverDevice
+      }),
+      { retain: env.RetainMessages }
+    );
+
+    client.publish(
       `${env.MQTTBaseTopic}/button/${serverTitleSanitised}/powerOff/config`,
       JSON.stringify({
         payload_available: true,
@@ -849,6 +864,26 @@ function getDockerDetails(
     client.subscribe(
       `${env.MQTTBaseTopic}/${serverTitleSanitised}/${docker.name}/dockerState`
     );
+
+    // publish image update status sensor
+    client.publish(
+      `${env.MQTTBaseTopic}/sensor/${serverTitleSanitised}/${docker.name}_update/config`,
+      JSON.stringify({
+        value_template: "{{ value_json.uptoDate }}",
+        state_topic: `${env.MQTTBaseTopic}/${serverTitleSanitised}/${docker.name}`,
+        json_attributes_topic: `${env.MQTTBaseTopic}/${serverTitleSanitised}/${docker.name}`,
+        name: `docker_${docker.name}_update_status`,
+        unique_id: `${serverTitleSanitised}_${docker.name}_update`,
+        device: {
+          identifiers: [serverTitleSanitised],
+          name: serverTitleSanitised,
+          manufacturer: server.serverDetails.motherboard,
+          model: "Docker"
+        }
+      }),
+      { retain: env.RetainMessages }
+    );
+
     updated[ip].dockers[dockerId] = JSON.stringify(docker);
   }
 }

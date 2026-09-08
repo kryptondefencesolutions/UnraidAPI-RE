@@ -118,7 +118,25 @@ export async function getImage(
   });
 }
 
+let scrapeInFlight: Promise<void> | null = null;
+
 export async function getUnraidDetails(
+  servers: RootServerJSONConfig,
+  serverAuth: string
+) {
+  if (scrapeInFlight) {
+    logger.debug("Scrape already in progress, joining existing run");
+    return scrapeInFlight;
+  }
+
+  scrapeInFlight = scrapeAllServers(servers, serverAuth).finally(() => {
+    scrapeInFlight = null;
+  });
+
+  return scrapeInFlight;
+}
+
+async function scrapeAllServers(
   servers: RootServerJSONConfig,
   serverAuth: string
 ) {

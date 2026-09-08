@@ -15,8 +15,8 @@ jobs:
         with:
           node-version: '16.x'
       - run: |
-            git config --global user.email "bokker11@hotmail.com"
-            git config --global user.name "Norbert Takács"
+            git config --global user.email "psmith282@gmail.com"
+            git config --global user.name "Paul Smith"
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
@@ -34,4 +34,4 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           push: true
-          tags: bokker/unraidapi-re:${{ env.GITHUB_REF_SLUG }}
+          tags: psmith282/unraidapi-re:${{ env.GITHUB_REF_SLUG }}

@@ -484,7 +484,7 @@ function getServerDetails(
       JSON.stringify({
         payload_on: "Started",
         payload_off: "Stopped",
-        value_template: "{{ value_json.arrayStatus }}",
+        value_template: "{{ value_json.arrayStatus | default('unknown') }}",
         state_topic: `${env.MQTTBaseTopic}/${serverTitleSanitised}`,
         json_attributes_topic: `${env.MQTTBaseTopic}/${serverTitleSanitised}`,
         name: `array`,
@@ -818,7 +818,7 @@ function getDockerDetails(
       JSON.stringify({
         payload_on: "started",
         payload_off: "stopped",
-        value_template: "{{ value_json.status }}",
+        value_template: "{{ value_json.status | default('unknown') }}",
         state_topic: `${env.MQTTBaseTopic}/${serverTitleSanitised}/${docker.name}`,
         json_attributes_topic: `${env.MQTTBaseTopic}/${serverTitleSanitised}/${docker.name}`,
         name: `docker_${docker.name}`,
@@ -844,7 +844,7 @@ function getDockerDetails(
       JSON.stringify({
         payload_available: true,
         payload_not_available: false,
-        value_template: "{{ value_json.status }}",
+        value_template: "{{ value_json.status | default('unknown') }}",
         state_topic: `${env.MQTTBaseTopic}/${serverTitleSanitised}/${docker.name}`,
         json_attributes_topic: `${env.MQTTBaseTopic}/${serverTitleSanitised}/${docker.name}`,
         name: `docker_${docker.name}_restart`,
@@ -868,7 +868,7 @@ function getDockerDetails(
     client.publish(
       `${env.MQTTBaseTopic}/sensor/${serverTitleSanitised}/${docker.name}_update/config`,
       JSON.stringify({
-        value_template: "{{ value_json.uptoDate }}",
+        value_template: "{{ value_json.uptoDate | default('unknown') }}",
         state_topic: `${env.MQTTBaseTopic}/${serverTitleSanitised}/${docker.name}`,
         json_attributes_topic: `${env.MQTTBaseTopic}/${serverTitleSanitised}/${docker.name}`,
         name: `docker_${docker.name}_update_status`,

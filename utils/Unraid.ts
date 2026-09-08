@@ -374,7 +374,11 @@ async function scrapeMainHTML(ip: string, serverAuth: string) {
 
     return {
       arrayStatus: extractReverseValue(
-        extractValue(response.data, '<table class="array_status">', "/span>"),
+        extractValue(
+          response.data,
+          '<table class="ArrayOperation-Table array_status">',
+          "/span>"
+        ),
         "<",
         ">"
       ).split(",")[0],

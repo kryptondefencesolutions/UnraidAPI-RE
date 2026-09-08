@@ -394,6 +394,10 @@ async function scrapeMainHTML(ip: string, serverAuth: string) {
       "</td></tr>\n          <tr><td>",
       "</td><td>"
     );
+    // A ">" means the cell holds markup (e.g. a "Start Parity-Check" link) rather than
+    // plain status text, which only happens when parity isn't currently valid.
+    const protectionText = protection.includes(">") ? undefined : protection;
+    const normalizedProtection = protectionText?.toLowerCase() ?? "";
 
     return {
       arrayStatus: extractReverseValue(
@@ -405,7 +409,10 @@ async function scrapeMainHTML(ip: string, serverAuth: string) {
         "<",
         ">"
       ).split(",")[0],
-      arrayProtection: protection.includes(">") ? undefined : protection,
+      arrayProtection: protectionText,
+      parityValid:
+        normalizedProtection.includes("valid") &&
+        !normalizedProtection.includes("invalid"),
       moverRunning: response.data.includes("Disabled - Mover is running."),
       parityCheckRunning: response.data.includes("Parity-Check in progress."),
       vmEnabled: enableVmFetching(response.data),
@@ -496,8 +503,7 @@ function processDockerResponse(details) {
                     child.children[1].children[1].children[0].contents;
                 }
                 if (child.children[1].children[1].children[1].children[1]) {
-                  docker.status =
-                    child.children[1].children[1].children[1].children[1].contents;
+                  docker.status = child.children[1].children[1].children[1].children[1].contents.trim();
                 }
                 if (child.children[2]?.contents) {
                   docker.containerId = child.children[2].contents.replace(

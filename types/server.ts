@@ -45,6 +45,7 @@ export type Containers = {
 export interface ServerDetails {
   arrayStatus: string;
   arrayProtection: string;
+  parityValid: boolean;
   moverRunning: boolean;
   parityCheckRunning: boolean;
   title: string;

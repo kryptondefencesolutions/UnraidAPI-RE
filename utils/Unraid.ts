@@ -34,12 +34,16 @@ import fetch from "node-fetch";
 import FormData from "form-data";
 import logger from "./logger";
 
-axios.defaults.timeout = 3000;
+const DEFAULT_REQUEST_TIMEOUT = 8000;
+axios.defaults.timeout = process.env.RequestTimeout
+  ? parseInt(process.env.RequestTimeout, 10)
+  : DEFAULT_REQUEST_TIMEOUT;
 axios.defaults.withCredentials = true;
-axios.defaults.httpsAgent = new https.Agent({
+const insecureHttpsAgent = new https.Agent({
   keepAlive: true,
   rejectUnauthorized: false
 });
+axios.defaults.httpsAgent = insecureHttpsAgent;
 
 // Add a request interceptor
 axios.interceptors.request.use(
@@ -86,6 +90,7 @@ export async function getImage(
         path,
       {
         method: "get",
+        agent: insecureHttpsAgent,
         headers: {
           Authorization: `Basic ${serverAuth[server]}`,
           Cookie: authCookies[server],

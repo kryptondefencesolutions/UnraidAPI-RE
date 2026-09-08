@@ -17,6 +17,7 @@
     "MQTTSelfSigned": false,
     "MQTTRefreshRate": null,
     "MQTTCacheTime": null,
+    "RequestTimeout": null,
     "KeyStorage": "config"
   },
   "schema": {
@@ -29,6 +30,7 @@
     "MQTTSelfSigned": "bool?",
     "MQTTRefreshRate": "int?",
     "MQTTCacheTime": "int?",
+    "RequestTimeout": "int?",
     "KeyStorage": "str?"
   },
   "ports": {

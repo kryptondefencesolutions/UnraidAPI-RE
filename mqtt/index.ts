@@ -428,16 +428,14 @@ let repeater;
 let count = 0;
 
 function mqttRepeat(client) {
-  const { MQTTRefreshRate, MQTTCacheTime } = env;
+  const { MQTTRefreshRate } = env;
 
   const repeater = setTimeout(() => {
     count++;
 
-    if (count > (60 / MQTTRefreshRate) * MQTTCacheTime) {
-      count = 0;
-      updated = {};
-    }
-
+    // Keep the MQTT entity cache alive across refresh cycles. Clearing it here
+    // makes HA lose the retained discovery/state trail and can cause entities to
+    // disappear from MQTT Explorer until the next data change.
     updateMQTT(client);
     mqttRepeat(client);
   }, MQTTRefreshRate * 1000);

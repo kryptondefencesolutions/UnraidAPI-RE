@@ -859,7 +859,8 @@ function getDockerDetails(
           model: "Docker"
         },
         command_topic: `${env.MQTTBaseTopic}/${serverTitleSanitised}/${docker.name}/dockerState`
-      })
+      }),
+      { retain: env.RetainMessages }
     );
     client.subscribe(
       `${env.MQTTBaseTopic}/${serverTitleSanitised}/${docker.name}/dockerState`

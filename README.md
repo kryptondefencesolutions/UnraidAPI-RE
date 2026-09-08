@@ -49,6 +49,7 @@ The tags follow the unraid major releases and should work for minor also:
 | MQTTRefreshRate | number | 60 | Time in seconds to poll for updates
 | MQTTCacheTime | number | 60 | Time in minutes after which all entities will be updated in MQTT
 | RequestTimeout | number | 8000 | Time in ms before a scrape request to Unraid times out
+| RetainMessages | boolean | true | Retain MQTT discovery configs and states so entities survive broker/Home Assistant restarts. Set to `false` to disable
 | LOG_LEVEL | string | info | info, debug, error, warn
 | KeyStorage | string | config | Where to store the secure keys. If left blank the keys are kept in memory and will be destroyed each time the container is updated. Set to config to have the data persist
 | WRITE_HTML_OUTPUT | boolean | false | Writes the html files it scrapes to config/html_output

@@ -1,6 +1,9 @@
 export default {
   MQTTBroker: process.env.MQTTBroker,
-  RetainMessages: process.env.RetainMessages === "true",
+  // Retained by default: MQTT discovery configs (and states) must survive
+  // broker/HA restarts, otherwise entities go "unavailable" until their
+  // underlying data next changes. Opt out with RetainMessages=false.
+  RetainMessages: process.env.RetainMessages !== "false",
   MQTTBaseTopic: process.env.MQTTBaseTopic,
   MQTTRefreshRate: process.env.MQTTRefreshRate
     ? parseInt(process.env.MQTTRefreshRate)

@@ -18,6 +18,7 @@
     "MQTTRefreshRate": null,
     "MQTTCacheTime": null,
     "RequestTimeout": null,
+    "RetainMessages": null,
     "KeyStorage": "config"
   },
   "schema": {
@@ -31,6 +32,7 @@
     "MQTTRefreshRate": "int?",
     "MQTTCacheTime": "int?",
     "RequestTimeout": "int?",
+    "RetainMessages": "bool?",
     "KeyStorage": "str?"
   },
   "ports": {

@@ -49,6 +49,8 @@ The tags follow the unraid major releases and should work for minor also:
 | MQTTRefreshRate | number | 60 | Time in seconds to poll for updates
 | MQTTCacheTime | number | 60 | Time in minutes after which all entities will be updated in MQTT
 | RequestTimeout | number | 8000 | Time in ms before a scrape request to Unraid times out
+| UnraidCACert | string | none | Path (inside the container) to Unraid's TLS certificate, to verify HTTPS to Unraid. Use the certificate only, not `/boot/config/ssl/certs/*_unraid_bundle.pem`, which also holds the private key. Without it, certificate verification is off
+| UnraidTLSName | string | none | The name in Unraid's certificate, usually `<server>.local`, when you connect by IP
 | RetainMessages | boolean | true | Retain MQTT discovery configs and states so entities survive broker/Home Assistant restarts. Set to `false` to disable
 | LOG_LEVEL | string | info | info, debug, error, warn
 | KeyStorage | string | config | Where to store the secure keys. If left blank the keys are kept in memory and will be destroyed each time the container is updated. Set to config to have the data persist
@@ -56,6 +58,20 @@ The tags follow the unraid major releases and should work for minor also:
 | Docker host port | number | 3005 | Default web-UI port. Container 80:3005 host
 
 
+
+## Verifying Unraid's TLS certificate
+
+Unraid serves its web UI with a self-signed certificate for `<server>.local`. To verify it instead of
+turning verification off, give the container a copy of the **certificate only**: the
+`*_unraid_bundle.pem` files in `/boot/config/ssl/certs/` also contain the private key. On Unraid:
+
+```bash
+openssl x509 -in /boot/config/ssl/certs/<server>_unraid_bundle.pem -out /mnt/user/appdata/Unraid-API/unraid-cert.pem
+```
+
+Then set `UnraidCACert=/app/config/unraid-cert.pem` and `UnraidTLSName=<server>.local`, and remove any
+`NODE_TLS_REJECT_UNAUTHORIZED=0`: that turns off certificate checks for every connection the app makes.
+If Unraid regenerates its certificate, copy it again.
 
 # Home Assistant Integration
 ## Automatic

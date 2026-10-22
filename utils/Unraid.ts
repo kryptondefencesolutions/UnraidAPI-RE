@@ -86,7 +86,7 @@ axios.interceptors.request.use(
     }
 
     // Log the request URL
-    logger.debug(`Request URL: ${request.url}`);
+    logger.debug(`Request URL: ${String(request.url).replace(/(csrf_token=)[^&]+/gi, "$1<redacted>")}`);
     return request;
   },
   (error) => {
@@ -243,7 +243,7 @@ async function logInToUrl(url: string, data: any, ip: string) {
 
     if (response.headers["set-cookie"] && response.headers["set-cookie"][0]) {
       authCookies[ip] = response.headers["set-cookie"][0];
-      logger.info(`Updating auth cookie for ${ip} ${authCookies[ip]}`);
+      logger.info(`Updating auth cookie for ${ip}`); // never log the cookie: it is a live Unraid session
     }
   } catch (error) {
     if (
@@ -251,7 +251,7 @@ async function logInToUrl(url: string, data: any, ip: string) {
       error.response.headers["set-cookie"][0]
     ) {
       authCookies[ip] = error.response.headers["set-cookie"][0];
-      logger.info(`Updating auth cookie for ${ip} ${authCookies[ip]}`);
+      logger.info(`Updating auth cookie for ${ip}`); // never log the cookie: it is a live Unraid session
     } else if (error.response?.headers.location) {
       return logInToUrl(
         error.response.headers.location,
@@ -1057,7 +1057,7 @@ export async function changeVMState(
 ) {
   if (!token) {
     token = (await getCSRFToken(server, auth)) as string;
-    console.info(`Got new CSRF_token: ${token}`);
+    console.info("Got new CSRF token"); // the token itself is a secret
   }
   return axios({
     method: "POST",
@@ -1101,7 +1101,7 @@ export async function changeDockerState(
 ) {
   if (!token) {
     token = (await getCSRFToken(server, auth)) as string;
-    logger.info(`Got new CSRF_token: ${token}`);
+    logger.info("Got new CSRF token"); // the token itself is a secret
   }
   return axios({
     method: "POST",

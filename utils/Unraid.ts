@@ -2,6 +2,7 @@ import axios, { AxiosError } from "axios";
 import fs from "fs";
 import http from "http";
 import https from "https";
+import tls from "tls";
 import { extractServerDetails } from "./extractServerDetails";
 import { extractDiskDetails } from "./extractDiskDetails";
 import { extractValue } from "./extractValue";
@@ -39,11 +40,40 @@ axios.defaults.timeout = process.env.RequestTimeout
   ? parseInt(process.env.RequestTimeout, 10)
   : DEFAULT_REQUEST_TIMEOUT;
 axios.defaults.withCredentials = true;
-const insecureHttpsAgent = new https.Agent({
-  keepAlive: true,
-  rejectUnauthorized: false
-});
-axios.defaults.httpsAgent = insecureHttpsAgent;
+// HTTPS to the Unraid web UI. Unraid ships a self-signed certificate, so by default the agent can't
+// verify it. Set UnraidCACert to a file holding that certificate (certificate only, not the bundle
+// with its private key) to verify it properly. Its name is usually <server>.local, which won't match
+// when connecting by IP, so UnraidTLSName says which name to check the certificate against.
+// Without UnraidCACert, verification stays off as before (with a warning), so existing setups keep
+// working.
+const unraidHttpsAgent = buildUnraidHttpsAgent();
+axios.defaults.httpsAgent = unraidHttpsAgent;
+
+function buildUnraidHttpsAgent(): https.Agent {
+  const caFile = process.env.UnraidCACert;
+  if (!caFile) {
+    logger.warn(
+      "TLS certificate verification for Unraid is OFF. Set UnraidCACert (and UnraidTLSName) to verify Unraid's certificate."
+    );
+    return new https.Agent({ keepAlive: true, rejectUnauthorized: false });
+  }
+  const ca = fs.readFileSync(caFile);
+  const name = process.env.UnraidTLSName;
+  logger.info(
+    `Verifying Unraid's TLS certificate against ${caFile}${name ? ` as ${name}` : ""}`
+  );
+  return new https.Agent({
+    keepAlive: true,
+    ca,
+    rejectUnauthorized: true,
+    ...(name
+      ? {
+          checkServerIdentity: (_host: string, cert: tls.PeerCertificate) =>
+            tls.checkServerIdentity(name, cert)
+        }
+      : {})
+  });
+}
 
 // Add a request interceptor
 axios.interceptors.request.use(
@@ -90,7 +120,7 @@ export async function getImage(
         path,
       {
         method: "get",
-        agent: insecureHttpsAgent,
+        agent: unraidHttpsAgent,
         headers: {
           Authorization: `Basic ${serverAuth[server]}`,
           Cookie: authCookies[server],

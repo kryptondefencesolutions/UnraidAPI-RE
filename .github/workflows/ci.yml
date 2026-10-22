@@ -1,0 +1,51 @@
+name: CI
+
+# PRs only (plus manual runs), so a push to a PR branch isn't built twice. master is covered by
+# release.yml, which runs once per merge.
+on:
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  image:
+    name: Build image and smoke test
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - name: Build
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          load: true
+          tags: unraidapi-re:ci
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      - name: Smoke test (Node version, UI, API)
+        run: |
+          docker run -d --name app -p 8080:80 unraidapi-re:ci
+          for _ in $(seq 1 60); do curl -fs -o /dev/null http://localhost:8080/ && break; sleep 2; done
+          docker exec app node -v | grep -E '^v24\.' || { echo "expected Node 24"; exit 1; }
+          curl -fsS http://localhost:8080/ | grep -q '<title>'
+          curl -fsS http://localhost:8080/api/getServers | grep -q '"servers"'
+          docker logs app
+
+  secrets:
+    name: Secret scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: gitleaks
+        run: |
+          curl -fsSL https://github.com/gitleaks/gitleaks/releases/download/v8.21.2/gitleaks_8.21.2_linux_x64.tar.gz | tar xz gitleaks
+          ./gitleaks git --redact --verbose --log-opts="origin/${{ github.base_ref || 'master' }}..HEAD" .
